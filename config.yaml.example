@@ -1,0 +1,5 @@
+# API token
+apiToken:
+# Admin Usernames of this bot
+adminUsers:
+- 'USERNAME'

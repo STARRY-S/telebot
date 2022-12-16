@@ -1,3 +1,4 @@
 /.vscode/
 /telebot
 /config.yaml
+/*.out

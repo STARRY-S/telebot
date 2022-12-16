@@ -1,17 +1,14 @@
 package status
 
-// #include <sys/sysinfo.h>
-import "C"
-
 import (
 	"bufio"
 	"bytes"
 	"errors"
 	"fmt"
+	"os"
 	"os/exec"
+	"strconv"
 	"strings"
-
-	"github.com/STARRY-S/telebot/utils"
 )
 
 const (
@@ -26,11 +23,12 @@ const (
 )
 
 type sysinfo struct {
-	uptime    float64
-	totalram  float64
-	freeram   float64
-	totalswap float64
-	freeswap  float64
+	Uptime       float32
+	MemTotal     float32
+	MemFree      float32
+	MemAvailable float32
+	SwapTotal    float32
+	SwapFree     float32
 }
 
 func GetStatus() (string, error) {
@@ -38,23 +36,83 @@ func GetStatus() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	var info C.struct_sysinfo
-	C.sysinfo(&info)
-	sysinfo := sysinfo{
-		uptime:    float64(info.uptime),
-		totalram:  float64(info.totalram),
-		freeram:   float64(info.freeram),
-		totalswap: float64(info.totalswap),
-		freeswap:  float64(info.freeswap),
+
+	meminfo, err := os.Open("/proc/meminfo")
+	if err != nil {
+		return "", err
 	}
+	defer meminfo.Close()
+	scanner := bufio.NewScanner(meminfo)
+	scanner.Split(bufio.ScanLines)
+	info := sysinfo{}
+	for scanner.Scan() {
+		line := scanner.Text()
+		switch {
+		case strings.HasPrefix(line, "MemTotal"):
+			for _, s := range strings.Split(line, " ") {
+				if i, err := strconv.Atoi(s); err == nil {
+					info.MemTotal = float32(i) / GB * KB
+					break
+				}
+			}
+		case strings.HasPrefix(line, "MemFree"):
+			for _, s := range strings.Split(line, " ") {
+				if i, err := strconv.Atoi(s); err == nil {
+					info.MemFree = float32(i) / GB * KB
+					break
+				}
+			}
+		case strings.HasPrefix(line, "MemAvailable"):
+			for _, s := range strings.Split(line, " ") {
+				if i, err := strconv.Atoi(s); err == nil {
+					info.MemAvailable = float32(i) / GB * KB
+					break
+				}
+			}
+		case strings.HasPrefix(line, "SwapTotal"):
+			for _, s := range strings.Split(line, " ") {
+				if i, err := strconv.Atoi(s); err == nil {
+					info.SwapTotal = float32(i) / GB * KB
+					break
+				}
+			}
+		case strings.HasPrefix(line, "SwapFree"):
+			for _, s := range strings.Split(line, " ") {
+				if i, err := strconv.Atoi(s); err == nil {
+					info.SwapFree = float32(i) / GB * KB
+					break
+				}
+			}
+		}
+	}
+	uptimeInfo, err := os.Open("/proc/uptime")
+	if err != nil {
+		return "", err
+	}
+	defer uptimeInfo.Close()
+	uptimeBytes := make([]byte, 64)
+	if _, err := uptimeInfo.Read(uptimeBytes); err != nil {
+		return "", err
+	}
+	uptimeSlice := strings.Split(string(uptimeBytes), " ")
+	if len(uptimeSlice) == 0 {
+		return "", fmt.Errorf("failed to get uptime")
+	}
+	uptime, err := strconv.ParseFloat(uptimeSlice[0], 32)
+	if err != nil {
+		return "", err
+	}
+	info.Uptime = float32(uptime) / HOUR * SECOND
 
 	infoBuff := &bytes.Buffer{}
-	fmt.Fprintf(infoBuff, "CPU:        %v\n", cpuTemp)
-	fmt.Fprintf(infoBuff, "Uptime:     %.2f hour\n", sysinfo.uptime/HOUR)
-	fmt.Fprintf(infoBuff, "Total RAM:  %.2fG\n", sysinfo.totalram/GB)
-	fmt.Fprintf(infoBuff, "Free RAM:   %.2fG\n", sysinfo.freeram/GB)
-	fmt.Fprintf(infoBuff, "Total Swap: %.2fG\n", sysinfo.totalswap/GB)
-	fmt.Fprintf(infoBuff, "Free Swap:  %.2fG\n", sysinfo.freeswap/GB)
+	// Actual Free Memory = Free + Buffers + Cached
+	fmt.Fprintf(infoBuff, "CPU: %v\n", cpuTemp)
+	fmt.Fprintf(infoBuff, "Uptime: %.2f hour\n", info.Uptime)
+	fmt.Fprintf(infoBuff, "Total RAM: %.2fG\n", info.MemTotal)
+	fmt.Fprintf(infoBuff, "Free RAM: %.2fG\n", info.MemFree)
+	fmt.Fprintf(infoBuff, "Available RAM: %.2fG\n", info.MemAvailable)
+	fmt.Fprintf(infoBuff, "Total Swap: %.2fG\n", info.SwapTotal)
+	fmt.Fprintf(infoBuff, "Free Swap: %.2fG\n", info.SwapFree)
 
 	return infoBuff.String(), nil
 }
@@ -65,7 +123,13 @@ func sensors() (string, error) {
 		return "", errors.New("sensors not found")
 	}
 
-	return utils.RunCommandFunc(path)
+	var stdout bytes.Buffer
+	cmd := exec.Command(path)
+	cmd.Stdout = &stdout
+	if err := cmd.Run(); err != nil {
+		return "", fmt.Errorf("sensors: %w", err)
+	}
+	return stdout.String(), nil
 }
 
 func cpuTemp() (string, error) {

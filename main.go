@@ -1,6 +1,7 @@
 package main
 
 import (
+	"strings"
 	"time"
 
 	"github.com/STARRY-S/telebot/config"
@@ -17,7 +18,7 @@ func main() {
 
 	bot, err := telebot.NewBot(pref)
 	if err != nil {
-		logrus.Fatal(err)
+		logrus.Fatal(strings.Split(err.Error(), config.GetApiToken())[1:])
 		return
 	}
 

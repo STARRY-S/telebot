@@ -4,9 +4,9 @@ go 1.19
 
 require (
 	github.com/sirupsen/logrus v1.6.0
-	golang.org/x/exp v0.0.0-20221208152030-732eee02a75a
 	gopkg.in/telebot.v3 v3.1.2
 	gopkg.in/yaml.v2 v2.4.0
+	k8s.io/utils v0.0.0-20221128185143-99ec85e7a448
 )
 
 require (

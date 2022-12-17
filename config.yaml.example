@@ -1,5 +1,9 @@
 # API token
 apiToken:
-# Admin Usernames of this bot
-adminUsers:
-- 'USERNAME'
+
+# Owner of this bot
+owner: ""
+
+# Admin list
+admins:
+    - ""

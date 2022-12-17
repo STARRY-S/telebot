@@ -4,13 +4,14 @@ import (
 	"os"
 
 	"github.com/sirupsen/logrus"
-	"golang.org/x/exp/slices"
 	"gopkg.in/yaml.v2"
+	"k8s.io/utils/strings/slices"
 )
 
 type Config struct {
-	ApiToken       string   `yaml:"apiToken"`
-	AvailableUsers []string `yaml:"adminUsers"`
+	ApiToken string   `yaml:"apiToken"`
+	Owner    string   `yaml:"owner"`
+	Admins   []string `yaml:"admins"`
 }
 
 const (
@@ -22,7 +23,7 @@ var (
 	config = Config{}
 )
 
-func init() {
+func Init() {
 	data, err := os.ReadFile(CONFIG_FILE_NAME)
 	if err != nil {
 		panic(err)
@@ -31,7 +32,6 @@ func init() {
 		panic(err)
 	}
 
-	logrus.Debugf("Config: %+v", config)
 	if config.ApiToken == "" {
 		logrus.Info("'apiToken' not set in config, reading it from env")
 		config.ApiToken = os.Getenv(APITOKEN_ENV_NAME)
@@ -45,6 +45,13 @@ func GetApiToken() string {
 	return config.ApiToken
 }
 
-func IsAdmin(username string) bool {
-	return slices.Contains(config.AvailableUsers, username)
+func Admins() []string {
+	if config.Admins == nil {
+		return make([]string, 0)
+	}
+	return slices.Clone(config.Admins)
+}
+
+func Owner() string {
+	return config.Owner
 }

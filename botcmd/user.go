@@ -39,7 +39,7 @@ func AddUserCommands(bot *telebot.Bot) {
 		text := strings.TrimLeft(c.Text(), "/sha256 ")
 		sum := sha256.Sum256([]byte(text))
 		return c.Reply(
-			fmt.Sprintf("%x", sum),
+			fmt.Sprintf("`%x`", sum),
 			telebot.ModeMarkdownV2,
 		)
 	})

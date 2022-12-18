@@ -107,12 +107,12 @@ func GetStatus() (string, error) {
 	infoBuff := &bytes.Buffer{}
 	// Actual Free Memory = Free + Buffers + Cached
 	fmt.Fprintf(infoBuff, "CPU: %v\n", cpuTemp)
-	fmt.Fprintf(infoBuff, "Uptime: %.2f hour\n", info.Uptime)
-	fmt.Fprintf(infoBuff, "Total RAM: %.2fG\n", info.MemTotal)
-	fmt.Fprintf(infoBuff, "Free RAM: %.2fG\n", info.MemFree)
-	fmt.Fprintf(infoBuff, "Available RAM: %.2fG\n", info.MemAvailable)
-	fmt.Fprintf(infoBuff, "Total Swap: %.2fG\n", info.SwapTotal)
-	fmt.Fprintf(infoBuff, "Free Swap: %.2fG\n", info.SwapFree)
+	fmt.Fprintf(infoBuff, "Uptime: %.2f Hour\n", info.Uptime)
+	fmt.Fprintf(infoBuff, "TotalRAM: %.2fG\n", info.MemTotal)
+	fmt.Fprintf(infoBuff, "FreeRAM: %.2fG\n", info.MemFree)
+	fmt.Fprintf(infoBuff, "AvailableRAM: %.2fG\n", info.MemAvailable)
+	fmt.Fprintf(infoBuff, "TotalSwap: %.2fG\n", info.SwapTotal)
+	fmt.Fprintf(infoBuff, "FreeSwap: %.2fG\n", info.SwapFree)
 
 	return infoBuff.String(), nil
 }

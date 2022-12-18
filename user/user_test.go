@@ -3,14 +3,14 @@ package user
 import "testing"
 
 func Test_Register(t *testing.T) {
-	if err := Register("test", LevelUser); err != nil {
+	if err := Register("test", LevelUnknow); err != nil {
 		t.Error(err)
 	}
 	u, ok := users["test"]
 	if !ok {
 		t.Error("failed")
 	}
-	if u.Username != "test" || u.UserLevel != LevelUser {
+	if u.Username != "test" || u.UserLevel != LevelUnknow {
 		t.Error("failed")
 	}
 	if err := Register("test", LevelAdmin); err != nil {

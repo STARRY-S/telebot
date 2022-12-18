@@ -9,9 +9,10 @@ import (
 )
 
 type Config struct {
-	ApiToken string   `yaml:"apiToken"`
-	Owner    string   `yaml:"owner"`
-	Admins   []string `yaml:"admins"`
+	ApiToken      string   `yaml:"apiToken"`
+	Owner         string   `yaml:"owner"`
+	Admins        []string `yaml:"admins"`
+	ExecWhiteList []string `yaml:"execWhitelist"`
 }
 
 const (
@@ -26,10 +27,10 @@ var (
 func Init() {
 	data, err := os.ReadFile(CONFIG_FILE_NAME)
 	if err != nil {
-		panic(err)
+		logrus.Panic(err)
 	}
 	if err = yaml.Unmarshal(data, &config); err != nil {
-		panic(err)
+		logrus.Panic(err)
 	}
 
 	if config.ApiToken == "" {
@@ -50,6 +51,13 @@ func Admins() []string {
 		return make([]string, 0)
 	}
 	return slices.Clone(config.Admins)
+}
+
+func ExecWhiteListContains(s string) bool {
+	if config.ExecWhiteList == nil {
+		return false
+	}
+	return slices.Contains(config.ExecWhiteList, s)
 }
 
 func Owner() string {

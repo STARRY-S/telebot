@@ -8,15 +8,15 @@ import (
 type Level int
 
 const (
+	// Unknow (common user) has the permission to interact with this bot,
+	// common users are not stored in memory.
 	LevelUnknow Level = iota
-	LevelUser
-	LevelAdmin
-	LevelOwner
-)
 
-const (
-	CacheFolder = "cache"
-	CacheFile   = "user-cache.json"
+	// Admin has the permission to view the status of bot & system
+	LevelAdmin
+
+	// Owner has the permission to control the bot & system
+	LevelOwner
 )
 
 type User struct {
@@ -24,13 +24,15 @@ type User struct {
 	Username  string
 }
 
+// users stores the data of owner and admin users,
+// unknow users are not stored in this map.
 var users map[string]*User = make(map[string]*User)
 
 func (u *User) IsUser() bool {
 	if u == nil {
 		return false
 	}
-	return u.UserLevel >= LevelUser
+	return u.UserLevel >= LevelUnknow
 }
 
 func (u *User) IsAdmin() bool {
@@ -59,7 +61,10 @@ func Register(name string, level Level) error {
 		return fmt.Errorf("Register: invalid name")
 	}
 	switch level {
-	case LevelUser:
+	case LevelUnknow:
+		// de-register user
+		delete(users, name)
+		return nil
 	case LevelAdmin:
 	case LevelOwner:
 	default:
@@ -74,10 +79,11 @@ func Register(name string, level Level) error {
 	return nil
 }
 
-func FindUser(name string) *User {
+func Find(name string) *User {
 	return users[name]
 }
 
+// Users get the formatted known user list (owner and admin)
 func Users() string {
 	buff := &bytes.Buffer{}
 	num := 0
@@ -95,12 +101,12 @@ func Users() string {
 
 func (l Level) String() string {
 	switch l {
-	case LevelUser:
+	case LevelUnknow:
 		return "User"
 	case LevelAdmin:
 		return "Admin"
 	case LevelOwner:
 		return "Owner"
 	}
-	return "Unknow"
+	return ""
 }

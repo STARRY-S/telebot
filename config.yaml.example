@@ -1,9 +1,21 @@
 # API token
-apiToken:
+apiToken: ""
 
 # Owner of this bot
 owner: ""
 
 # Admin list
 admins:
-    - ""
+- ""
+
+# Execute command whitelist
+execWhitelist:
+- "ls"
+- "cd"
+- "lsblk"
+- "curl"
+- "echo"
+- "df"
+- "free"
+- "sensors"
+- "sleep"

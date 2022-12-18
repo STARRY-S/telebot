@@ -1,15 +1,12 @@
 package main
 
 import (
-	"bytes"
-	"fmt"
 	"strings"
 	"time"
 
+	"github.com/STARRY-S/telebot/botcmd"
 	"github.com/STARRY-S/telebot/config"
-	"github.com/STARRY-S/telebot/status"
 	"github.com/STARRY-S/telebot/user"
-	"github.com/STARRY-S/telebot/utils"
 	"github.com/sirupsen/logrus"
 	telebot "gopkg.in/telebot.v3"
 )
@@ -38,86 +35,15 @@ func main() {
 		user.Register(owner, user.LevelOwner)
 	}
 
-	bot.Handle("/hello", func(c telebot.Context) error {
-		return c.Reply("Hi!")
-	})
-
-	bot.Handle("/ping", func(c telebot.Context) error {
-		return c.Reply("Pong!")
-	})
-
-	bot.Handle("/status", func(c telebot.Context) error {
-		// only available in private chat
-		switch c.Chat().Type {
-		case telebot.ChatChannelPrivate:
-		case telebot.ChatPrivate:
-		default:
-			return nil
-		}
-
-		if !user.FindUser(c.Chat().Username).IsAdmin() {
-			return c.Reply(utils.ReplyPermissionDenied)
-		}
-
-		status, err := status.GetStatus()
-		if err != nil {
-			return err
-		}
-		return c.Reply(status)
-	})
-
-	bot.Handle("/add_admin", func(c telebot.Context) error {
-		if !user.FindUser(c.Chat().Username).IsOwner() {
-			return c.Reply(utils.ReplyPermissionDenied)
-		}
-		args := c.Args()
-		if len(args) == 0 {
-			return c.Reply("Usage: /addAdmin <user>")
-		}
-		if !user.FindUser(args[0]).IsAdmin() {
-			err := user.Register(args[0], user.LevelAdmin)
-			if err != nil {
-				logrus.Errorf("addAdmin failed: %v", err)
-				return c.Reply("failed")
-			}
-		}
-		return nil
-	})
-
-	bot.Handle("/users", func(c telebot.Context) error {
-		// only available in private chat
-		switch c.Chat().Type {
-		case telebot.ChatChannelPrivate:
-		case telebot.ChatPrivate:
-		default:
-			return nil
-		}
-		if !user.FindUser(c.Chat().Username).IsOwner() {
-			return c.Reply(utils.ReplyPermissionDenied)
-		}
-
-		users := user.Users()
-		if users == "" {
-			return c.Reply("failed")
-		}
-		return c.Reply(users)
-	})
+	botcmd.AddUserCommands(bot)
+	botcmd.AddAdminCommands(bot)
+	botcmd.AddOwnerCommands(bot)
 
 	bot.Handle("/help", func(c telebot.Context) error {
-		return c.Reply(HelpMessage(user.FindUser(c.Chat().Username).Level()))
-	})
-
-	bot.Handle("/start", func(c telebot.Context) error {
-		if !user.FindUser(c.Chat().Username).IsUser() {
-			err := user.Register(c.Chat().Username, user.LevelAdmin)
-			if err != nil {
-				logrus.Errorf("/start failed: %v", err)
-				return nil
-			}
-			return c.Reply("Registered")
-		}
-
-		return c.Reply("Already registered")
+		return c.Reply(
+			HelpMessage(user.Find(c.Chat().Username).Level()),
+			telebot.ModeDefault,
+		)
 	})
 
 	logrus.Info("Start telebot.")
@@ -125,19 +51,14 @@ func main() {
 }
 
 func HelpMessage(level user.Level) string {
-	buff := &bytes.Buffer{}
+	var msg string = ""
 	if level >= user.LevelOwner {
-		fmt.Fprintln(buff, "/users Get users")
-		fmt.Fprintln(buff, "/add_admin Register admin user")
+		msg = botcmd.GetOwnerHelpMessage() + msg
 	}
 	if level >= user.LevelAdmin {
-		fmt.Fprintln(buff, "/status Get system status")
+		msg = botcmd.GetAdminHelpMessage() + msg
 	}
-	if level >= user.LevelUser {
-	}
-	fmt.Fprintln(buff, "/hello Say hello")
-	fmt.Fprintln(buff, "/ping Ping")
-	fmt.Fprintln(buff, "/help Show this message")
+	msg = botcmd.GetUserHelpMessage() + msg
 
-	return buff.String()
+	return msg
 }

@@ -143,6 +143,6 @@ func GetOwnerHelpMessage() string {
 	b := &bytes.Buffer{}
 	fmt.Fprintln(b, "/add_admin Register temporary admin user (Owner)")
 	fmt.Fprintln(b, "/del_admin Remove admin temporally (Owner)")
-	fmt.Fprintln(b, "/exec Run commands (Owner)")
+	fmt.Fprintln(b, "/exec Run commands (Private) (Owner)")
 	return b.String()
 }

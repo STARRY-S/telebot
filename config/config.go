@@ -37,7 +37,7 @@ func Init() {
 		logrus.Info("'apiToken' not set in config, reading it from env")
 		config.ApiToken = os.Getenv(APITOKEN_ENV_NAME)
 		if config.ApiToken == "" {
-			logrus.Fatal(APITOKEN_ENV_NAME + "env not set")
+			logrus.Fatalf("%s env not set", APITOKEN_ENV_NAME)
 		}
 	}
 }

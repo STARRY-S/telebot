@@ -14,6 +14,10 @@ import (
 func main() {
 	config.Init()
 	pref := telebot.Settings{
+		OnError: func(err error, c telebot.Context) {
+			logrus.Error(err)
+			c.Reply(err.Error())
+		},
 		Token:  config.GetApiToken(),
 		Poller: &telebot.LongPoller{Timeout: 10 * time.Second},
 	}
@@ -22,9 +26,9 @@ func main() {
 	if err != nil {
 		errMsg := strings.Split(err.Error(), config.GetApiToken())
 		if len(errMsg) > 1 {
-			logrus.Fatal(errMsg[1:])
+			logrus.Fatalf("NewBot failed: %v", errMsg[1:])
 		} else {
-			logrus.Fatal(err)
+			logrus.Fatalf("NewBot failed: %v", err)
 		}
 	}
 

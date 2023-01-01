@@ -5,10 +5,12 @@ import (
 	"crypto/md5"
 	"crypto/sha256"
 	"encoding/base64"
+	"flag"
 	"fmt"
 	"strings"
 
 	"github.com/STARRY-S/telebot/utils"
+	"github.com/STARRY-S/telebot/utils/passwd"
 	"gopkg.in/telebot.v3"
 )
 
@@ -94,6 +96,78 @@ func AddUserCommands(bot *telebot.Bot) {
 		)
 	})
 
+	bot.Handle("/genpasswd", func(c telebot.Context) error {
+		if !isUser(c) {
+			return c.Reply(utils.ReplyPermissionDenied)
+		}
+
+		cmdArgs := c.Args()
+		var (
+			passwdLength     int
+			passwdWords      int
+			passwdType       string
+			passwdHasNum     bool
+			passwdHasSpecial bool
+		)
+
+		cmd := flag.NewFlagSet("", flag.ContinueOnError)
+		cmdOutput := bytes.NewBuffer(nil)
+		cmd.SetOutput(cmdOutput)
+		cmd.IntVar(
+			&passwdLength,
+			"len",
+			16,
+			"password length (random mode)")
+		cmd.IntVar(
+			&passwdWords,
+			"words",
+			4,
+			"password words number (word mode)")
+		cmd.StringVar(
+			&passwdType,
+			"type",
+			"random",
+			"password type ('random', 'word')")
+		cmd.BoolVar(
+			&passwdHasNum,
+			"has-num",
+			true,
+			"password has number")
+		cmd.BoolVar(
+			&passwdHasSpecial,
+			"has-special",
+			true,
+			"password has special characters")
+		cmd.Parse(cmdArgs)
+		if cmdOutput.String() != "" {
+			return c.Reply(
+				fmt.Sprintf("```\n%s\n```", cmdOutput.String()),
+				telebot.ModeMarkdownV2,
+			)
+		}
+		switch passwdType {
+		case "random":
+			s := passwd.GenRandomPasswd(
+				passwdLength, passwdHasNum, passwdHasSpecial)
+			return c.Reply(
+				fmt.Sprintf("`%s`", s),
+				telebot.ModeMarkdownV2,
+			)
+		case "word":
+			s := passwd.GenRememberablePasswd(passwdWords)
+			return c.Reply(
+				fmt.Sprintf("`%s`", s),
+				telebot.ModeMarkdownV2,
+			)
+		}
+
+		cmd.Usage()
+		return c.Reply(
+			fmt.Sprintf("```\n%s\n```", cmdOutput.String()),
+			telebot.ModeMarkdownV2,
+		)
+	})
+
 	bot.Handle("/start", func(c telebot.Context) error {
 		if !isUser(c) {
 			return c.Reply(utils.ReplyPermissionDenied)
@@ -113,6 +187,7 @@ func GetUserHelpMessage() string {
 	fmt.Fprintln(b, "/md5 Calculate md5sum")
 	fmt.Fprintln(b, "/base64 Calculate base64")
 	fmt.Fprintln(b, "/decode_base64 Decode base64")
+	fmt.Fprintln(b, "/genpasswd Generate password (-h to get more info)")
 	fmt.Fprintln(b, "/help Show this message")
 	return b.String()
 }

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"os/exec"
+	"strings"
 	"time"
 
 	"github.com/STARRY-S/telebot/config"
@@ -76,24 +77,25 @@ func AddOwnerCommands(bot *telebot.Bot) {
 
 		if !config.ExecWhiteListContains(cmdArgs[0]) {
 			return c.Reply(
-				fmt.Sprintf("`%s` is not allowed to execute", cmdArgs[0]),
-				telebot.ModeMarkdownV2,
+				fmt.Sprintf("<code>%s</code> is not allowed to execute",
+					cmdArgs[0]),
+				telebot.ModeHTML,
 			)
 		}
 
 		cmdout := make(chan string)
 		cmderr := make(chan string)
-		cmd := exec.Command(cmdArgs[0], cmdArgs[1:]...)
+		cmd := exec.Command("bash", "-c", strings.Join(cmdArgs, " "))
 		go func() {
 			out := &bytes.Buffer{}
 			cmd.Stdout = out
 			cmd.Stderr = out
 			if err := cmd.Start(); err != nil {
-				cmderr <- fmt.Sprintf("%s: %s", out.String(), err.Error())
+				cmderr <- fmt.Sprintf("%s\n%s", out.String(), err.Error())
 				return
 			}
 			if err := cmd.Wait(); err != nil {
-				cmderr <- fmt.Sprintf("%s: %s", out.String(), err.Error())
+				cmderr <- fmt.Sprintf("%s\n%s", out.String(), err.Error())
 				return
 			}
 
@@ -108,14 +110,15 @@ func AddOwnerCommands(bot *telebot.Bot) {
 			if err := cmd.Process.Kill(); err != nil {
 				logrus.Error("Failed to kill command: ", err)
 				return c.Reply(fmt.Sprintf("Failed: execute timeout\n"+
-					"failed to kill: \n```%s\n```", err.Error()),
-					telebot.ModeMarkdownV2)
+					"failed to kill: \n<code>%s</code>", err.Error()),
+					telebot.ModeHTML)
 			}
 			if err := cmd.Process.Release(); err != nil {
 				logrus.Error("Failed to release command: ", err)
 				return c.Reply(fmt.Sprintf("Failed: execute timeout\n"+
-					"killed but failed to release: \n```%s\n```", err.Error()),
-					telebot.ModeMarkdownV2)
+					"killed but failed to release: \n<code>%s</code>",
+					err.Error()),
+					telebot.ModeHTML)
 			}
 			return c.Reply("Failed: execute timeout, killed")
 		case out := <-cmdout:
@@ -125,15 +128,15 @@ func AddOwnerCommands(bot *telebot.Bot) {
 				out = out[:3000] + "\n......"
 			}
 			return c.Reply(
-				fmt.Sprintf("Done\n```\n%s\n```", out),
-				telebot.ModeMarkdownV2,
+				fmt.Sprintf("<pre>%s</pre>", out),
+				telebot.ModeHTML,
 			)
 		case e := <-cmderr:
 			// command executes failed
 			timer.Stop()
 			return c.Reply(
-				fmt.Sprintf("Execute failed:\n```\n%s\n```", e),
-				telebot.ModeMarkdownV2,
+				fmt.Sprintf("Execute failed:\n<pre>%s</pre>", e),
+				telebot.ModeHTML,
 			)
 		}
 	})

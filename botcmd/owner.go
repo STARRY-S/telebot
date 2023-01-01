@@ -89,11 +89,11 @@ func AddOwnerCommands(bot *telebot.Bot) {
 			cmd.Stdout = out
 			cmd.Stderr = out
 			if err := cmd.Start(); err != nil {
-				cmderr <- err.Error()
+				cmderr <- fmt.Sprintf("%s: %s", out.String(), err.Error())
 				return
 			}
 			if err := cmd.Wait(); err != nil {
-				cmderr <- err.Error()
+				cmderr <- fmt.Sprintf("%s: %s", out.String(), err.Error())
 				return
 			}
 

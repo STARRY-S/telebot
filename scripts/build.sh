@@ -6,4 +6,6 @@ if [[ ! -e "config.yaml" ]]; then
     cp config.yaml.example config.yaml
 fi
 
+go build .
+
 docker build -t telebot .

@@ -4,9 +4,9 @@ import (
 	"bytes"
 	"fmt"
 
-	"github.com/STARRY-S/telebot/status"
-	"github.com/STARRY-S/telebot/user"
-	"github.com/STARRY-S/telebot/utils"
+	"github.com/STARRY-S/telebot/pkg/status"
+	"github.com/STARRY-S/telebot/pkg/user"
+	"github.com/STARRY-S/telebot/pkg/utils"
 	"gopkg.in/telebot.v3"
 )
 

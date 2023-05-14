@@ -1,7 +1,8 @@
 package botcmd
 
 import (
-	"github.com/STARRY-S/telebot/user"
+	"github.com/STARRY-S/telebot/pkg/config"
+	"github.com/STARRY-S/telebot/pkg/user"
 	"gopkg.in/telebot.v3"
 )
 
@@ -14,7 +15,8 @@ func isAdmin(c telebot.Context) bool {
 }
 
 func isOwner(c telebot.Context) bool {
-	return user.Find(c.Chat().Username).IsOwner()
+	return user.Find(c.Chat().Username).IsOwner() &&
+		c.Chat().ID == config.OwnerID()
 }
 
 func isPrivateChat(c telebot.Context) bool {

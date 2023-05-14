@@ -2,16 +2,21 @@ package botcmd
 
 import (
 	"bytes"
+	"context"
+	"flag"
 	"fmt"
 	"os/exec"
 	"strings"
 	"time"
 
-	"github.com/STARRY-S/telebot/config"
-	"github.com/STARRY-S/telebot/user"
-	"github.com/STARRY-S/telebot/utils"
+	"github.com/STARRY-S/telebot/pkg/aws"
+	"github.com/STARRY-S/telebot/pkg/aws/ec2"
+	"github.com/STARRY-S/telebot/pkg/config"
+	"github.com/STARRY-S/telebot/pkg/user"
+	"github.com/STARRY-S/telebot/pkg/utils"
 	"github.com/sirupsen/logrus"
 	"gopkg.in/telebot.v3"
+	"gopkg.in/yaml.v3"
 )
 
 const (
@@ -140,6 +145,75 @@ func AddOwnerCommands(bot *telebot.Bot) {
 			)
 		}
 	})
+
+	bot.Handle("/ec2", func(c telebot.Context) error {
+		if !isOwner(c) {
+			return c.Reply(utils.ReplyPermissionDenied)
+		}
+		if !isPrivateChat(c) {
+			return c.Reply(utils.ReplyOnlyPrivate)
+		}
+		if err := c.Notify(telebot.Typing); err != nil {
+			logrus.Errorf("Notify failed: %v", err)
+		}
+
+		cmdArgs := c.Args()
+		var (
+			enableRegex bool
+			showStopped bool
+		)
+
+		cmd := flag.NewFlagSet("", flag.ContinueOnError)
+		cmdOutput := bytes.NewBuffer(nil)
+		cmd.SetOutput(cmdOutput)
+		cmd.BoolVar(
+			&enableRegex,
+			"r",
+			false,
+			"enable regex in config")
+		cmd.BoolVar(
+			&showStopped,
+			"s",
+			true,
+			"show stopped instances")
+		cmd.Parse(cmdArgs)
+		if cmdOutput.String() != "" {
+			return c.Reply(
+				fmt.Sprintf("<code>\n%s\n</code>", cmdOutput.String()),
+				telebot.ModeHTML,
+			)
+		}
+
+		var err error
+		var status *ec2.EC2Status
+		if enableRegex {
+			logrus.Debugf("regex output enabled")
+			status, err = aws.GetEC2Status(
+				context.Background(),
+				config.EC2InstanceNameRegex(),
+				showStopped)
+		} else {
+			status, err = aws.GetEC2Status(
+				context.Background(), nil, showStopped)
+		}
+		if err != nil {
+			logrus.Error("%v", err)
+			return c.Reply(fmt.Sprintf("ERROR: \n<code>%v</code>\n", err),
+				telebot.ModeHTML)
+		}
+		d, err := yaml.Marshal(status)
+		if err != nil {
+			logrus.Error("Marshal: %v", err)
+			return c.Reply(fmt.Sprintf("ERROR: \n<code>%v</code>\n", err),
+				telebot.ModeHTML)
+		}
+		if err := c.Notify(telebot.Typing); err != nil {
+			logrus.Errorf("Notify failed: %v", err)
+		}
+		return c.Reply(fmt.Sprintf("Result:\n<code>%s</code>", string(d)),
+			telebot.ModeHTML,
+		)
+	})
 }
 
 func GetOwnerHelpMessage() string {
@@ -147,5 +221,6 @@ func GetOwnerHelpMessage() string {
 	fmt.Fprintln(b, "/add_admin Register temporary admin user (Owner)")
 	fmt.Fprintln(b, "/del_admin Remove admin temporally (Owner)")
 	fmt.Fprintln(b, "/exec Run commands (Private) (Owner)")
+	fmt.Fprintln(b, "/ec2 Query all EC2 instances (Private) (Owner)")
 	return b.String()
 }

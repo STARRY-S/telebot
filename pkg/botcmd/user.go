@@ -9,8 +9,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/STARRY-S/telebot/utils"
-	"github.com/STARRY-S/telebot/utils/passwd"
+	"github.com/STARRY-S/telebot/pkg/utils"
+	"github.com/STARRY-S/telebot/pkg/utils/passwd"
 	"gopkg.in/telebot.v3"
 )
 
@@ -141,7 +141,7 @@ func AddUserCommands(bot *telebot.Bot) {
 		cmd.Parse(cmdArgs)
 		if cmdOutput.String() != "" {
 			return c.Reply(
-				fmt.Sprintf("```\n%s\n```", cmdOutput.String()),
+				fmt.Sprintf("<code>\n%s\n</code>", cmdOutput.String()),
 				telebot.ModeMarkdownV2,
 			)
 		}
@@ -168,6 +168,19 @@ func AddUserCommands(bot *telebot.Bot) {
 		)
 	})
 
+	bot.Handle("/my_uid", func(c telebot.Context) error {
+		if !isUser(c) {
+			return c.Reply(utils.ReplyPermissionDenied)
+		}
+
+		msg := fmt.Sprintf(`
+Hi "<code>%s</code>",
+Your UID is "<code>%v</code>"
+`, c.Chat().Username, c.Chat().ID)
+
+		return c.Reply(msg, telebot.ModeHTML)
+	})
+
 	bot.Handle("/start", func(c telebot.Context) error {
 		if !isUser(c) {
 			return c.Reply(utils.ReplyPermissionDenied)
@@ -188,6 +201,7 @@ func GetUserHelpMessage() string {
 	fmt.Fprintln(b, "/base64 Calculate base64")
 	fmt.Fprintln(b, "/decode_base64 Decode base64")
 	fmt.Fprintln(b, "/genpasswd Generate password (-h to get more info)")
+	fmt.Fprintln(b, "/my_uid Get my telegram UID")
 	fmt.Fprintln(b, "/help Show this message")
 	return b.String()
 }

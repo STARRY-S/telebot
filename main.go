@@ -1,17 +1,26 @@
 package main
 
 import (
+	"flag"
 	"strings"
 	"time"
 
-	"github.com/STARRY-S/telebot/botcmd"
-	"github.com/STARRY-S/telebot/config"
-	"github.com/STARRY-S/telebot/user"
+	"github.com/STARRY-S/telebot/pkg/botcmd"
+	"github.com/STARRY-S/telebot/pkg/config"
+	"github.com/STARRY-S/telebot/pkg/reminder"
+	"github.com/STARRY-S/telebot/pkg/user"
 	"github.com/sirupsen/logrus"
 	telebot "gopkg.in/telebot.v3"
 )
 
 func main() {
+	debugFlag := flag.Bool("debug", false, "Enable debug output")
+	flag.Parse()
+	if *debugFlag {
+		logrus.SetLevel(logrus.DebugLevel)
+		logrus.Debug("Debug output enabled")
+	}
+
 	config.Init()
 	pref := telebot.Settings{
 		OnError: func(err error, c telebot.Context) {
@@ -36,6 +45,10 @@ func main() {
 		user.Register(v, user.LevelAdmin)
 	}
 	if owner := config.Owner(); owner != "" {
+		id := config.OwnerID()
+		if id == 0 {
+			logrus.Fatal("failed to get owner UID")
+		}
 		user.Register(owner, user.LevelOwner)
 	}
 
@@ -49,6 +62,8 @@ func main() {
 			telebot.ModeDefault,
 		)
 	})
+
+	reminder.Init(bot)
 
 	logrus.Info("Start telebot.")
 	bot.Start()

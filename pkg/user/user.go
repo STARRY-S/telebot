@@ -80,7 +80,11 @@ func Register(name string, level Level) error {
 }
 
 func Find(name string) *User {
-	return users[name]
+	u, ok := users[name]
+	if !ok {
+		return &User{}
+	}
+	return u
 }
 
 // Users get the formatted known user list (owner and admin)

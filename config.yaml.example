@@ -27,7 +27,8 @@ aws:
   # Enable AWS EC2 instances not-terminated reminder
   reminder: false
   # Send reminder at specific time every day
-  reminderTime: "19:30"
+  # Set this to UTC if running in container
+  reminderTime: "11:30"
   # Send reminder on working day (Mon - Fri)
   sendOnWorkingDay: true
   # Send reminder on working day (Sat, Sun)

@@ -9,7 +9,7 @@ import (
 )
 
 func GenRandomPasswd(length int, hasNum, hasSpec bool) string {
-	rand.Seed(time.Now().UnixNano())
+	r := rand.New(rand.NewSource(time.Now().UnixNano()))
 	chars := []byte("ABCDEFGHIJKLMNOPQRSTUVWXYZ" +
 		"abcdefghijklmnopqrstuvwxyz")
 	if hasNum {
@@ -20,7 +20,7 @@ func GenRandomPasswd(length int, hasNum, hasSpec bool) string {
 	}
 	var b strings.Builder
 	for i := 0; i < length; i++ {
-		b.WriteByte(chars[rand.Intn(len(chars))])
+		b.WriteByte(chars[r.Intn(len(chars))])
 	}
 
 	return b.String()

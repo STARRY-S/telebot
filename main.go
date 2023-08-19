@@ -2,36 +2,41 @@ package main
 
 import (
 	"flag"
+	"os"
 	"strings"
 	"time"
 
 	"github.com/STARRY-S/telebot/pkg/botcmd"
 	"github.com/STARRY-S/telebot/pkg/config"
-	"github.com/STARRY-S/telebot/pkg/reminder"
 	"github.com/STARRY-S/telebot/pkg/user"
+	"github.com/STARRY-S/telebot/pkg/utils"
 	"github.com/sirupsen/logrus"
 	telebot "gopkg.in/telebot.v3"
 )
 
 func main() {
-	debugFlag := flag.Bool("debug", false, "Enable debug output")
-	flag.Parse()
+	cmd := flag.NewFlagSet("", flag.ExitOnError)
+	debugFlag := cmd.Bool("debug", false, "Enable debug output")
+	versionFlag := cmd.Bool("version", false, "Show version")
+	cmd.Parse(os.Args[1:])
+	if *versionFlag {
+		logrus.Info(utils.GetVersion())
+		os.Exit(0)
+	}
 	if *debugFlag {
 		logrus.SetLevel(logrus.DebugLevel)
 		logrus.Debug("Debug output enabled")
 	}
 
 	config.Init()
-	pref := telebot.Settings{
+	bot, err := telebot.NewBot(telebot.Settings{
 		OnError: func(err error, c telebot.Context) {
 			logrus.Error(err)
 			c.Reply(err.Error())
 		},
 		Token:  config.GetApiToken(),
 		Poller: &telebot.LongPoller{Timeout: 10 * time.Second},
-	}
-
-	bot, err := telebot.NewBot(pref)
+	})
 	if err != nil {
 		errMsg := strings.Split(err.Error(), config.GetApiToken())
 		if len(errMsg) > 1 {
@@ -63,9 +68,7 @@ func main() {
 		)
 	})
 
-	reminder.Init(bot)
-
-	logrus.Info("Start telebot.")
+	logrus.Info("Successfully started telebot.")
 	bot.Start()
 }
 

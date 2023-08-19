@@ -70,7 +70,7 @@ func AddUserCommands(bot *telebot.Bot) {
 		if len(c.Args()) == 0 {
 			return c.Reply("Usage: /base64 <text>")
 		}
-		text := strings.TrimLeft(c.Text(), "/base64 ")
+		text := strings.TrimPrefix(c.Text(), "/base64 ")
 		str := base64.StdEncoding.EncodeToString([]byte(text))
 		return c.Reply(
 			fmt.Sprintf("`%s`", str),
@@ -85,7 +85,7 @@ func AddUserCommands(bot *telebot.Bot) {
 		if len(c.Args()) == 0 {
 			return c.Reply("Usage: /decode_base64 <text>")
 		}
-		text := strings.TrimLeft(c.Text(), "/decode_base64 ")
+		text := strings.TrimPrefix(c.Text(), "/decode_base64 ")
 		data, err := base64.StdEncoding.DecodeString(text)
 		if err != nil {
 			return c.Reply(fmt.Sprintf("failed: %s", err.Error()))
@@ -142,7 +142,7 @@ func AddUserCommands(bot *telebot.Bot) {
 		if cmdOutput.String() != "" {
 			return c.Reply(
 				fmt.Sprintf("<code>\n%s\n</code>", cmdOutput.String()),
-				telebot.ModeMarkdownV2,
+				telebot.ModeHTML,
 			)
 		}
 		switch passwdType {

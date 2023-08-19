@@ -1,11 +1,8 @@
 package config
 
 import (
-	"fmt"
 	"os"
-	"regexp"
 	"strconv"
-	"strings"
 
 	"github.com/sirupsen/logrus"
 	"golang.org/x/exp/slices"
@@ -13,35 +10,11 @@ import (
 )
 
 type Config struct {
-	ApiToken      string    `yaml:"apiToken"`
-	Owner         string    `yaml:"owner"`
-	OwnerID       string    `yaml:"ownerID"`
-	Admins        []string  `yaml:"admins"`
-	ExecWhiteList []string  `yaml:"execWhitelist"`
-	AWS           AWSConfig `yaml:"aws"`
-}
-
-type AWSConfig struct {
-	ReminderEnabled  bool   `yaml:"reminder"`
-	ReminderTime     string `yaml:"reminderTime"`
-	SendOnWorkingDay bool   `yaml:"sendOnWorkingDay"`
-	SendOnWeekend    bool   `yaml:"sendOnWeekend"`
-
-	Regions []string `yaml:"regions"`
-
-	EC2 AWSEC2Config `yaml:"ec2"`
-
-	EKS AWSEKSConfig `yaml:"eks,omitempty"`
-}
-
-type AWSEC2Config struct {
-	InstanceNameRegex string `yaml:"instanceNameRegex"`
-	// outputStoppedInstance
-	StoppedInstance bool `yaml:"outputStoppedInstance"`
-}
-
-// TODO: Add EKS config
-type AWSEKSConfig struct {
+	ApiToken      string   `yaml:"apiToken"`
+	Owner         string   `yaml:"owner"`
+	OwnerID       string   `yaml:"ownerID"`
+	Admins        []string `yaml:"admins"`
+	ExecWhiteList []string `yaml:"execWhitelist"`
 }
 
 const (
@@ -100,64 +73,8 @@ func OwnerID() int64 {
 	}
 	id, err := strconv.Atoi(config.OwnerID)
 	if err != nil {
-		logrus.Error("failed to get owner ID: %v", err)
+		logrus.Errorf("failed to get owner ID: %v", err)
 		return 0
 	}
 	return int64(id)
-}
-
-func AWSReminderEnabled() bool {
-	return config.AWS.ReminderEnabled
-}
-
-func AWSReminderSendOnWeekend() bool {
-	return config.AWS.SendOnWeekend
-}
-
-func AWSReminderTime() (hour, minute int, err error) {
-	spec := strings.Split(config.AWS.ReminderTime, ":")
-	if len(spec) != 2 {
-		return 0, 0, fmt.Errorf("invalid format, should be like '00:00'")
-	}
-	hour, err = strconv.Atoi(spec[0])
-	if err != nil {
-		return 0, 0, err
-	}
-	minute, err = strconv.Atoi(spec[1])
-	if err != nil {
-		return 0, 0, err
-	}
-	return hour, minute, nil
-}
-
-func AWSRegions() []string {
-	region := make([]string, len(config.AWS.Regions))
-	copy(region, config.AWS.Regions)
-	return region
-}
-
-func EC2OutputStopped() bool {
-	return config.AWS.EC2.StoppedInstance
-}
-
-var (
-	instanceNameRegex *regexp.Regexp
-)
-
-func EC2InstanceNameRegex() *regexp.Regexp {
-	if config.AWS.EC2.InstanceNameRegex == "" {
-		return nil
-	}
-
-	if instanceNameRegex != nil {
-		return instanceNameRegex
-	}
-
-	var err error
-	instanceNameRegex, err = regexp.Compile(config.AWS.EC2.InstanceNameRegex)
-	if err != nil {
-		logrus.Error("EC2InstanceNameRegex: %v", err)
-		return nil
-	}
-	return instanceNameRegex
 }

@@ -38,7 +38,7 @@ func AddUserCommands(bot *telebot.Bot) {
 		if len(c.Args()) == 0 {
 			return c.Reply("Usage: /sha256 <text>")
 		}
-		text := strings.TrimLeft(c.Text(), "/sha256 ")
+		text := strings.TrimPrefix(c.Text(), "/sha256 ")
 		sum := sha256.Sum256([]byte(text))
 		return c.Reply(
 			fmt.Sprintf("`%x`", sum),
@@ -56,7 +56,7 @@ func AddUserCommands(bot *telebot.Bot) {
 		if len(c.Args()) == 0 {
 			return c.Reply("Usage: /md5 <text>")
 		}
-		text := strings.TrimLeft(c.Text(), "/md5 ")
+		text := strings.TrimPrefix(c.Text(), "/md5 ")
 		return c.Reply(
 			fmt.Sprintf("`%x`", md5.Sum([]byte(text))),
 			telebot.ModeMarkdownV2,

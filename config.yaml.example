@@ -1,4 +1,4 @@
-# API token
+# API token (also set by ENV 'TELEGRAM_APITOKEN')
 apiToken: ""
 
 # Owner of this bot
@@ -21,3 +21,12 @@ execWhitelist:
 - "free"
 - "sensors"
 - "sleep"
+- "bash"
+- "pacman"
+- "ss"
+- "cat"
+- "wget"
+- "sed"
+
+# Execute command timeout (seconds), default 30s
+execTimeout: 30

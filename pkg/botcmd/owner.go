@@ -3,6 +3,7 @@ package botcmd
 import (
 	"bytes"
 	"fmt"
+	"os"
 	"os/exec"
 	"strings"
 	"time"
@@ -12,10 +13,6 @@ import (
 	"github.com/STARRY-S/telebot/pkg/utils"
 	"github.com/sirupsen/logrus"
 	"gopkg.in/telebot.v3"
-)
-
-const (
-	ExecTimeout = time.Second * 3
 )
 
 func AddOwnerCommands(bot *telebot.Bot) {
@@ -83,26 +80,23 @@ func AddOwnerCommands(bot *telebot.Bot) {
 			)
 		}
 
-		cmdout := make(chan string)
-		cmderr := make(chan string)
 		cmd := exec.Command("bash", "-c", strings.Join(cmdArgs, " "))
+		outch := make(chan string)
+		errch := make(chan string)
 		go func() {
 			out := &bytes.Buffer{}
 			cmd.Stdout = out
 			cmd.Stderr = out
 			if err := cmd.Start(); err != nil {
-				cmderr <- fmt.Sprintf("%s\n%s", out.String(), err.Error())
-				return
+				errch <- fmt.Sprintf("%s\n%s", out.String(), err.Error())
 			}
 			if err := cmd.Wait(); err != nil {
-				cmderr <- fmt.Sprintf("%s\n%s", out.String(), err.Error())
-				return
+				errch <- fmt.Sprintf("%s\n%s", out.String(), err.Error())
 			}
-
-			cmdout <- out.String()
+			outch <- out.String()
 		}()
 
-		timer := time.NewTimer(ExecTimeout)
+		timer := time.NewTimer(config.ExecTimeout())
 		select {
 		case <-timer.C:
 			// command executes timeout
@@ -121,17 +115,19 @@ func AddOwnerCommands(bot *telebot.Bot) {
 					telebot.ModeHTML)
 			}
 			return c.Reply("Failed: execute timeout, killed")
-		case out := <-cmdout:
+		case out := <-outch:
 			// command executes successfully
 			timer.Stop()
 			if len(out) > 3000 {
 				out = out[:3000] + "\n......"
+			} else if len(out) == 0 {
+				return c.Reply("Command execute successfully with no output.")
 			}
 			return c.Reply(
 				fmt.Sprintf("<pre>%s</pre>", out),
 				telebot.ModeHTML,
 			)
-		case e := <-cmderr:
+		case e := <-errch:
 			// command executes failed
 			timer.Stop()
 			return c.Reply(
@@ -140,6 +136,17 @@ func AddOwnerCommands(bot *telebot.Bot) {
 			)
 		}
 	})
+
+	bot.Handle("/restart", func(c telebot.Context) error {
+		if !isOwner(c) {
+			return c.Reply(utils.ReplyPermissionDenied)
+		}
+
+		c.Send("Bot will restart now.")
+		logrus.Warnf("Bot will restart now.")
+		os.Exit(0)
+		return nil
+	})
 }
 
 func GetOwnerHelpMessage() string {
@@ -147,5 +154,6 @@ func GetOwnerHelpMessage() string {
 	fmt.Fprintln(b, "/add_admin Register temporary admin user (Owner)")
 	fmt.Fprintln(b, "/del_admin Remove admin temporally (Owner)")
 	fmt.Fprintln(b, "/exec Run commands (Private) (Owner)")
+	fmt.Fprintln(b, "/restart Restart (kill) this bot (Owner)")
 	return b.String()
 }

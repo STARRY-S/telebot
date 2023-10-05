@@ -3,6 +3,7 @@ package config
 import (
 	"os"
 	"strconv"
+	"time"
 
 	"github.com/sirupsen/logrus"
 	"golang.org/x/exp/slices"
@@ -15,6 +16,7 @@ type Config struct {
 	OwnerID       string   `yaml:"ownerID"`
 	Admins        []string `yaml:"admins"`
 	ExecWhiteList []string `yaml:"execWhitelist"`
+	ExecTimeout   int      `yaml:"execTimeout"`
 }
 
 const (
@@ -60,6 +62,10 @@ func ExecWhiteListContains(s string) bool {
 		return false
 	}
 	return slices.Contains(config.ExecWhiteList, s)
+}
+
+func ExecTimeout() time.Duration {
+	return time.Duration(config.ExecTimeout) * time.Second
 }
 
 func Owner() string {

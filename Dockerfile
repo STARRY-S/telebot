@@ -1,14 +1,15 @@
 FROM archlinux
 
-# Configure Arch Linux CN repository & Install dependencies
-RUN echo "Server = https://mirrors.bfsu.edu.cn/archlinux/\$repo/os/\$arch" > /etc/pacman.d/mirrorlist && \
-    echo "Server = https://mirrors.tuna.tsinghua.edu.cn/archlinux/\$repo/os/\$arch" >> /etc/pacman.d/mirrorlist && \
-    pacman --noconfirm -Syyu && \
-    pacman --noconfirm -S lm_sensors words && \
+ENV http_proxy=${http_proxy} https_proxy=${https_proxy} no_proxy=${no_proxy}
+
+# Install dependencies
+RUN pacman --noconfirm -Syyu && \
+    pacman --noconfirm -S lm_sensors words openssh pacman-contrib && \
     pacman --noconfirm -Scc
 
 WORKDIR /telebot
-COPY . .
+COPY config.yaml.example telebot ./
+
 # Install telebot
 RUN cp config.yaml.example config.yaml && \
     mv telebot /usr/local/bin/

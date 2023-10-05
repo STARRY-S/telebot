@@ -4,7 +4,7 @@ ENV http_proxy=${http_proxy} https_proxy=${https_proxy} no_proxy=${no_proxy}
 
 # Install dependencies
 RUN pacman --noconfirm -Syyu && \
-    pacman --noconfirm -S lm_sensors words openssh pacman-contrib && \
+    pacman --noconfirm -S lm_sensors words openssh ffmpeg && \
     pacman --noconfirm -Scc
 
 WORKDIR /telebot

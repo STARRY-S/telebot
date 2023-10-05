@@ -32,6 +32,46 @@ Owner only:
 
 Administrator users also have permission to convert Video (GIF Sticker) to GIF zip file.
 
+## Usage
+
+1. Build binary and create docker image:
+
+    ```bash
+    make build
+
+    # You can specify the `HTTP_PROXY` and `HTTPS_PROXY` env if needed
+    HTTP_RPOXY='http://127.0.0.1:8000' \
+        HTTPS_PROXY='http://127.0.0.1:8000' \
+        NO_PROXY='127.0.0.1' \
+        make build
+    ```
+
+2. Setup the config file & Run telebot in container image:
+
+    ```bash
+    # Update config (Setup API tokens & ADMIN, Owner users)
+    vim config.yaml
+
+    # Run telebot in container
+    make run
+
+    # You can specify the `HTTP_PROXY` and `HTTPS_PROXY` env if needed
+    HTTP_RPOXY='http://127.0.0.1:8000' \
+        HTTPS_PROXY='http://127.0.0.1:8000' \
+        NO_PROXY='127.0.0.1' \
+        make run
+
+    # View logs
+    docker logs -f telebot
+    ```
+
+3. Destroy and clean-up resources:
+
+    ```bash
+    # kill & delete telebot container image
+    make release
+    ```
+
 ## License
 
 > MIT

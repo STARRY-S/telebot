@@ -3,7 +3,7 @@ package utils
 import "fmt"
 
 var (
-	version   = "v0.1.0-rc"
+	version   = "v0.1.0"
 	gitCommit = ""
 )
 

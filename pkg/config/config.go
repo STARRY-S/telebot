@@ -65,6 +65,9 @@ func ExecWhiteListContains(s string) bool {
 }
 
 func ExecTimeout() time.Duration {
+	if config.ExecTimeout == 0 {
+		return time.Second * 30
+	}
 	return time.Duration(config.ExecTimeout) * time.Second
 }
 

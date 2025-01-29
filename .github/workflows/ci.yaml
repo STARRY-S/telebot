@@ -2,6 +2,10 @@ name: Go
 
 on:
   push:
+    branches: []
+    tags-ignore: [ '**' ]
+  pull_request:
+    branches: []
 
 jobs:
   build:
@@ -16,11 +20,7 @@ jobs:
         with:
           go-version: ${{ matrix.go-version }}
       - name: Unit test
-        run: go test ./...
+        run: go test -v -count=1 ./...
       - name: Build test
         run: |
-          go build -o telebot .
-          echo "-------------------------"
-          ls -alh ./telebot
-          echo "-------------------------"
-          echo "Done"
+          make image

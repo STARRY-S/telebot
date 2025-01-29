@@ -3,6 +3,13 @@
 set -euo pipefail
 
 cd $(dirname $0)/../
+source scripts/version.sh
+
+TAG="${VERSION:-latest}"
+
+# Cleanup exist telebot instance.
+docker kill telebot &> /dev/null || true
+docker rm telebot &> /dev/null || true
 
 docker run -d \
     -e TELEGRAM_APITOKEN=${TELEGRAM_APITOKEN:-} \
@@ -16,4 +23,4 @@ docker run -d \
     --network=host \
     --restart=always \
     --name=telebot \
-    hxstarrys/telebot
+    hxstarrys/telebot:${TAG}

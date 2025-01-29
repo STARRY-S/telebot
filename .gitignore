@@ -3,3 +3,5 @@
 /config.yaml
 /*.out
 cache
+/build
+tmp*

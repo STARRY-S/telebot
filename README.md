@@ -34,25 +34,20 @@ Administrator users also have permission to convert Video (GIF Sticker) to GIF z
 
 ## Usage
 
-1. Build binary and create docker image:
+1. Build telebot in docker container.
 
     ```bash
-    make build
-
-    # You can specify the `HTTP_PROXY` and `HTTPS_PROXY` env if needed
-    HTTP_RPOXY='http://127.0.0.1:8000' \
-        HTTPS_PROXY='http://127.0.0.1:8000' \
-        NO_PROXY='127.0.0.1' \
-        make build
+    make image
     ```
 
-2. Setup the config file & Run telebot in container image:
+2. Run telebot container image.
 
     ```bash
     # Update config (Setup API tokens & ADMIN, Owner users)
+    cp config.yaml.example config.yaml
     vim config.yaml
 
-    # Run telebot in container
+    # Run telebot docker container image
     make run
 
     # You can specify the `HTTP_PROXY` and `HTTPS_PROXY` env if needed
@@ -65,13 +60,26 @@ Administrator users also have permission to convert Video (GIF Sticker) to GIF z
     docker logs -f telebot
     ```
 
-3. Destroy and clean-up resources:
-
-    ```bash
-    # kill & delete telebot container image
-    make release
-    ```
-
 ## License
 
-> MIT
+MIT License
+
+Copyright (c) 2025 STARRY-S
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.

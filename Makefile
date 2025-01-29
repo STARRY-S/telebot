@@ -1,10 +1,10 @@
-.PHONY: build run release
+.PHONY: build image run
 
 build:
 	./scripts/build.sh
 
+image:
+	./scripts/image.sh
+
 run:
 	./scripts/start.sh
-
-release:
-	./scripts/release.sh

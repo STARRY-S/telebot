@@ -1,15 +1,14 @@
 name: Go
 
-on: [push]
+on:
+  push:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        go-version: [ '1.21' ]
-
+        go-version: [ '1.23' ]
     steps:
       - uses: actions/checkout@v3
       - name: Setup Go ${{ matrix.go-version }}
@@ -19,4 +18,9 @@ jobs:
       - name: Unit test
         run: go test ./...
       - name: Build test
-        run: go build -v -o telebot . && ls -al ./telebot
+        run: |
+          go build -o telebot .
+          echo "-------------------------"
+          ls -alh ./telebot
+          echo "-------------------------"
+          echo "Done"

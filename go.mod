@@ -1,13 +1,15 @@
 module github.com/STARRY-S/telebot
 
-go 1.20
+go 1.22.0
+
+toolchain go1.23.2
 
 require (
 	github.com/sirupsen/logrus v1.9.3
-	github.com/stretchr/testify v1.9.0
+	github.com/stretchr/testify v1.10.0
 	github.com/tjarratt/babble v0.0.0-20210505082055-cbca2a4833c1
-	golang.org/x/exp v0.0.0-20240506185415-9bf2ced13842
-	gopkg.in/telebot.v3 v3.2.1
+	golang.org/x/exp v0.0.0-20241108190413-2d47ceb2692f
+	gopkg.in/telebot.v3 v3.3.8
 	gopkg.in/yaml.v3 v3.0.1
 )
 

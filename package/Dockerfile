@@ -34,4 +34,3 @@ COPY config.yaml.example ./config.yaml
 COPY --from=build /usr/local/bin/telebot /usr/local/bin
 
 ENTRYPOINT [ "telebot" ]
-CMD [ "-h" ]

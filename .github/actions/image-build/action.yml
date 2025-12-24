@@ -14,6 +14,8 @@ runs:
           ARCH="arm64"
         fi
         echo "ARCH=$ARCH" >> $GITHUB_ENV
+
+        echo "TAG=$TAG" >> $GITHUB_ENV
     - name: Login to ghcr.io
       uses: docker/login-action@v3
       with:
@@ -32,9 +34,9 @@ runs:
       with:
         push: true
         build-args: |
-          TAG=${{ github.ref_name }}
+          TAG=${{ env.REGISTRY }}/${{ env.REPOSITORY }}/telebot:latest,${{ env.REGISTRY }}/${{ env.REPOSITORY }}/telebot:${{ github.ref_name }}
           COMMIT=${{ github.sha }}
-        tags: ${{ env.REGISTRY }}/${{ env.REPOSITORY }}/telebot:${{ github.ref_name }}
+        tags: ${{ env.REGISTRY }}/${{ env.REPOSITORY }}/telebot:latest,${{ env.REGISTRY }}/${{ env.REPOSITORY }}/telebot:${{ github.ref_name }}
         platforms: "linux/${{ env.ARCH }}"
         file: package/Dockerfile
         sbom: true

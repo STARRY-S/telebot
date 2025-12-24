@@ -1,8 +1,8 @@
 ## Telebot
 
-This is my personal telebot, it has some common used functions by myself (password generator, base64 & SHA calculator, UID query, GIF downloader, etc...), API based on [go-telebot/telebot](https://github.com/go-telebot/telebot).
+My personal telebot, includes some common used functions by myself (password generator, base64 & SHA calculator, UID query, GIF downloader, etc...), based on [go-telebot/telebot](https://github.com/go-telebot/telebot).
 
-You can try this telebot via [Mikoto_bot](https://t.me/Mikoto_bot).
+Try this telebot via [Mikoto_bot](https://t.me/Mikoto_bot).
 
 ----
 
@@ -34,52 +34,23 @@ Administrator users also have permission to convert Video (GIF Sticker) to GIF z
 
 ## Usage
 
-1. Build telebot in docker container.
+Run telebot via container image:
 
-    ```bash
-    make image
-    ```
+```console
+$ git clone https://github.com/STARRY-S/telebot.git && cd telebot
+$ cp config.yaml.example config.yaml
 
-2. Run telebot container image.
+$ podman run -it -v $(pwd)/config.yaml:/telebot/config.yaml ghcr.io/starry-s/telebot:latest
+```
 
-    ```bash
-    # Update config (Setup API tokens & ADMIN, Owner users)
-    cp config.yaml.example config.yaml
-    vim config.yaml
+For local build:
 
-    # Run telebot docker container image
-    make run
-
-    # You can specify the `HTTP_PROXY` and `HTTPS_PROXY` env if needed
-    HTTP_RPOXY='http://127.0.0.1:8000' \
-        HTTPS_PROXY='http://127.0.0.1:8000' \
-        NO_PROXY='127.0.0.1' \
-        make run
-
-    # View logs
-    docker logs -f telebot
-    ```
+```console
+$ make build
+$ make image
+$ ./telebot -h
+```
 
 ## License
 
-MIT License
-
-Copyright (c) 2025 STARRY-S
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+> [MIT](LICENSE)

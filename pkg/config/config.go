@@ -5,9 +5,9 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/goccy/go-yaml"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/exp/slices"
-	"gopkg.in/yaml.v3"
 )
 
 type Config struct {

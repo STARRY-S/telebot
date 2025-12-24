@@ -18,3 +18,5 @@ set +x
 echo "--------------------------"
 ls -alh telebot
 echo "--------------------------"
+
+echo "build: Done"

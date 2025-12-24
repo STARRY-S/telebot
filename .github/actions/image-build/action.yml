@@ -1,0 +1,41 @@
+name: "Image build"
+description: "Build image"
+runs:
+  using: "composite"
+  steps:
+    - name: Prepare env
+      shell: bash
+      run: |-
+        REPOSITORY=$(echo ${{ github.repository_owner }} | tr '[:upper:]' '[:lower:]')
+        echo "REPOSITORY=$REPOSITORY" >> $GITHUB_ENV
+
+        ARCH="amd64"
+        if [[ $(uname -m) = aarch64 ]]; then
+          ARCH="arm64"
+        fi
+        echo "ARCH=$ARCH" >> $GITHUB_ENV
+    - name: Login to ghcr.io
+      uses: docker/login-action@v3
+      with:
+        registry: ${{ env.REGISTRY }}
+        username: ${{ env.REPOSITORY }}
+        password: ${{ env.GH_TOKEN }}
+    - name: Setup QEMU
+      uses: docker/setup-qemu-action@v3
+    - name: Setup Docker Buildx
+      uses: docker/setup-buildx-action@v3
+      with:
+        driver-opts: |
+          network=host
+    - name: Image Build and Push
+      uses: docker/build-push-action@v6
+      with:
+        push: true
+        build-args: |
+          TAG=${{ github.ref_name }}
+          COMMIT=${{ github.sha }}
+        tags: ${{ env.REGISTRY }}/${{ env.REPOSITORY }}/telebot:${{ github.ref_name }}
+        platforms: "linux/${{ env.ARCH }}"
+        file: package/Dockerfile
+        sbom: true
+        provenance: mode=max

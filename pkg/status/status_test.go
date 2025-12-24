@@ -13,5 +13,5 @@ func Test_GetStatus(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	t.Logf("\n" + status)
+	t.Logf("\n%v\n", status)
 }

@@ -3,8 +3,8 @@
 build:
 	./scripts/build.sh
 
+test:
+	./scripts/test.sh
+
 image:
 	./scripts/image.sh
-
-run:
-	./scripts/start.sh

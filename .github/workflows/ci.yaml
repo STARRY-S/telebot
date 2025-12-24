@@ -1,26 +1,37 @@
 name: Go
 
 on:
-  push:
-    branches: []
-    tags-ignore: [ '**' ]
   pull_request:
-    branches: []
+  push:
+    branches: [ '**' ]
+    tags-ignore: [ '**' ] # Disable Tag
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        go-version: [ '1.23' ]
     steps:
       - uses: actions/checkout@v4
       - name: Setup Go ${{ matrix.go-version }}
         uses: actions/setup-go@v5
         with:
-          go-version: ${{ matrix.go-version }}
+          go-version: '1.25'
       - name: Unit test
-        run: go test -v -count=1 ./...
+        run: make test
       - name: Build test
-        run: |
-          make image
+        run: make build
+  image-build:
+    runs-on: 'ubuntu-latest'
+    services:
+      registry:
+        image: registry:2.8
+        ports:
+          - 5000:5000
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+      - name: Build Image
+        uses: ./.github/actions/image-build
+        env:
+          REGISTRY: "localhost:5000"
+          REPOSITORY: "library"
+          GH_TOKEN: "test"

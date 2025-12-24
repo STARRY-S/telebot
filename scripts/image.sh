@@ -1,15 +1,12 @@
 #!/bin/bash
 
-set -euo pipefail
-
 cd $(dirname $0)/../
-source scripts/version.sh
 
-TAG="${VERSION:-latest}"
+set -exuo pipefail
 
-set -x
 docker build \
-    --build-arg GITCOMMIT=${GITCOMMIT} \
-    --build-arg VERSION=${VERSION} \
     -f package/Dockerfile \
-    -t hxstarrys/telebot:${TAG} .
+    --tag telebot \
+    .
+
+echo "image: Done"

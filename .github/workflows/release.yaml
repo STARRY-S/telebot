@@ -1,0 +1,22 @@
+name: Release
+
+on:
+  push:
+    tags: [ 'v*' ]
+
+permissions:
+  contents: write
+  packages: write
+
+env:
+  REGISTRY: "ghcr.io"
+  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+jobs:
+  image-build:
+    runs-on: 'ubuntu-latest'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+      - name: Build Image
+        uses: ./.github/actions/image-build
